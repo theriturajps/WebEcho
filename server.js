@@ -7,6 +7,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
+const cors = require('cors');
 
 // Load environment variables
 dotenv.config();
@@ -18,8 +19,20 @@ const profileRoutes = require('./routes/profileRoutes');
 
 // Initialize app
 const app = express();
+
+app.use(cors({
+  origin: process.env.BASE_URL, // Your production URL
+  credentials: true
+}));
+
+
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+  cors: {
+    origin: process.env.BASE_URL,
+    credentials: true
+  }
+});
 
 // Connect to MongoDB with increased timeout and connection options
 mongoose.connect(process.env.MONGODB_URI, {
