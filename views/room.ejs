@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <% if (roomName === 'default') { %>
+    <title>WebEcho - Home</title>
+  <% } else { %>
+    <title>WebEcho - <%= roomName %></title>
+  <% } %>
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="/" class="logo" style="display: flex; align-items: center; gap: 0.5rem; font-weight: bold; font-size: 1.2rem;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2" /><path d="M16.24 7.76a6 6 0 0 1 0 8.48" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /><path d="M7.76 16.24a6 6 0 0 1 0-8.48" /><path d="M4.93 19.07a10 10 0 0 1 0-14.14" /></svg>
+        WebEcho
+      </a>
+      <div class="flex items-center gap-2">
+        <% if (isAuthenticated) { %>
+          <a href="/profile" class="btn btn-secondary link btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <%= email.split('@')[0] %>
+          </a>
+        <% } %>
+
+        <button id="theme-toggle-btn" class="btn btn-secondary btn-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="card">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span id="room-name" class="font-medium">
+              <%= roomName %>
+            </span>
+            <span id="client-count" class="status">0 online</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <% if (isAuthenticated && isVerified && !isClaimed && roomName !=='default' ) { %>
+              <button id="claim-room-btn" class="btn btn-primary btn-sm">Claim</button>
+            <% } %>
+
+            <% if (isClaimed && isOwner) { %>
+              <button id="delete-room-btn" class="btn btn-danger btn-sm">Delete</button>
+            <% } %>
+
+            <% if (isAuthenticated) { %>
+              <button id="signout-btn" class="btn btn-secondary btn-sm">Sign Out</button>
+            <% } else { %>
+              <button id="auth-btn" class="btn btn-primary btn-sm">Sign In</button>
+            <% } %>
+          </div>
+        </div>
+
+        <textarea id="shared-text" class="editor" placeholder="Type or paste text here..."></textarea>
+
+        <div class="toolbar mt-4 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button id="change-room-btn" class="btn btn-secondary btn-sm">Change Room</button>
+            <button id="clear-text-btn" class="btn btn-secondary btn-sm">Clear</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 text-sm ml-auto">
+              <span id="char-count">0</span>/<span id="word-count">0</span>
+            </div>
+          </div>
+          <!-- Space Empty for something -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Room Dialog -->
+  <div id="room-dialog" class="dialog">
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h3 class="dialog-title">Change Room</h3>
+      </div>
+      <div class="form-group">
+        <label for="new-room-name" class="form-label">Room Name</label>
+        <input type="text" id="new-room-name" class="form-input" placeholder="Enter room name" value="<%= roomName %>">
+      </div>
+      <div class="dialog-footer">
+        <button id="cancel-room-change" class="btn btn-secondary">Cancel</button>
+        <button id="confirm-room-change" class="btn btn-primary">Go</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Dialog -->
+  <div id="auth-dialog" class="dialog">
+    <div class="dialog-content">
+      <div class="tabs">
+        <div id="login-tab" class="tab active">Login</div>
+        <div id="signup-tab" class="tab">Sign Up</div>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email" class="form-label">Email</label>
+          <input type="email" id="login-email" class="form-input" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password" class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Enter password" required>
+        </div>
+        <div class="flex items-center justify-between mb-2">
+          <a href="#" id="forgot-password-link" style="color: cornflowerblue;" class="text-sm link text-primary">Forgot password?</a>
+        </div>
+        <div class="dialog-footer">
+          <button type="button" id="cancel-login" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="confirm-login" class="btn btn-primary">Login</button>
+        </div>
+      </form>
+
+      <form id="signup-form" class="hidden">
+        <div class="form-group">
+          <label for="signup-email" class="form-label">Email</label>
+          <input type="email" id="signup-email" class="form-input" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="signup-password" class="form-label">Password</label>
+          <input type="password" id="signup-password" class="form-input" placeholder="Create password" required
+            minlength="6">
+        </div>
+        <div class="dialog-footer">
+          <button type="button" id="cancel-signup" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="confirm-signup" class="btn btn-primary">Sign Up</button>
+        </div>
+      </form>
+
+      <form id="forgot-password-form" class="hidden">
+        <div class="form-group">
+          <label for="forgot-email" class="form-label">Email</label>
+          <input type="email" id="forgot-email" class="form-input" placeholder="your@email.com" required>
+        </div>
+        <div class="dialog-footer">
+          <button type="button" id="back-to-login" class="btn btn-secondary">Back</button>
+          <button type="submit" id="send-reset" class="btn btn-primary">Send Reset OTP</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/theme.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+
+</html>
