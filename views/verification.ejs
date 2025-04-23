@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Verification - WebEcho</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="/" class="logo" style="display: flex; align-items: center; gap: 0.5rem; font-weight: bold; font-size: 1.2rem;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2" /><path d="M16.24 7.76a6 6 0 0 1 0 8.48" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /><path d="M7.76 16.24a6 6 0 0 1 0-8.48" /><path d="M4.93 19.07a10 10 0 0 1 0-14.14" /></svg>
+        WebEcho
+      </a>
+      <button id="theme-toggle-btn" class="btn btn-secondary btn-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      </button>
+    </header>
+
+    <main class="main">
+      <div class="card" style="max-width: 400px; margin: 2rem auto; text-align: center; padding: 1.5rem;">
+        <% if (success) { %>
+          <div style="margin-bottom: 1rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Email Verified!</h2>
+          <p style="margin-bottom: 1rem; font-size: 0.875rem;"><%= message %></p>
+          <div class="flex" style="justify-content: center; gap: 0.75rem;">
+            <a href="/" class="btn btn-sm link btn-primary">Home</a>
+            <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
+              <a href="/profile" class="btn btn-sm link btn-secondary">Profile</a>
+            <% } %>
+          </div>
+        <% } else { %>
+          <div style="margin-bottom: 1rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          </div>
+          <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Verification Failed</h2>
+          <p style="margin-bottom: 1rem; font-size: 0.875rem;"><%= message %></p>
+          <p class="mb-4 text-sm">Verification links expire after 15 minutes.</p>
+          <div class="flex" style="justify-content: center; gap: 0.75rem;">
+            <a href="/" class="btn btn-sm link btn-primary">Home</a>
+            <% if (typeof isAuthenticated !== 'undefined' && isAuthenticated) { %>
+              <button id="resend-verification" class="btn btn-sm btn-secondary">Resend</button>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/theme.js"></script>
+  <% if (!success && typeof isAuthenticated !=='undefined' && isAuthenticated) { %>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const resendBtn = document.getElementById('resend-verification');
+
+        resendBtn.addEventListener('click', async () => {
+          resendBtn.disabled = true;
+          resendBtn.textContent = 'Sending...';
+
+          try {
+            const response = await fetch('/auth/email/signup/resend', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              alert('Verification email resent successfully! Please check your inbox.');
+            } else {
+              alert(data.message || 'Failed to resend verification email');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to resend verification email');
+          } finally {
+            resendBtn.disabled = false;
+            resendBtn.textContent = 'Resend Verification';
+          }
+        });
+      });
+    </script>
+    <% } %>
+</body>
+
+</html>
