@@ -167,7 +167,8 @@ exports.logout = (req, res) => {
     res.clearCookie('connect.sid', {
       path: '/',
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production'
+      secure: true, // Always true
+      sameSite: 'none' // Required for cross-site
     });
 
     return res.status(200).json({ success: true, message: 'Logout successful' });
@@ -318,7 +319,7 @@ exports.resetPassword = async (req, res) => {
       success: false,
       error: 'SERVER_ERROR',
       message: 'Internal server error during password reset',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      // details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
